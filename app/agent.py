@@ -6,9 +6,16 @@ from langgraph.prebuilt import create_react_agent
 
 from app.utils import parse_agent_response
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # take environment variables from .env.
+
+zapier_url = os.getenv("ZAPIER_URL")
+
 # Define your local LLM's API endpoint
 local_llm = ChatOpenAI(
-    model="llama3.2:3b",  # Replace with your model's name if different
+    model="mistral",  # Replace with your model's name if different
     base_url="http://localhost:11434/v1"
 )
 
@@ -16,7 +23,7 @@ async def stream_agent(message: str):
     async with MultiServerMCPClient(
         {
             "zapier": {
-                "url": "https://actions.zapier.com/mcp/sk-ak-klURxXRKWKamKGQqadYx74muv5/sse",
+                "url": zapier_url,
                 "transport": "sse",
             }
         }

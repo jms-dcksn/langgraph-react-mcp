@@ -1,13 +1,20 @@
 import asyncio
+from dotenv import load_dotenv
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
+
+import os
+
+load_dotenv()  # take environment variables from .env.
+
+zapier_url = os.getenv("ZAPIER_URL")
 
 async def run_agent():
     async with MultiServerMCPClient(
         {
         "zapier": {
             # Ensure your start your weather server on port 8000
-            "url": "https://actions.zapier.com/mcp/sk-ak-klURxXRKWKamKGQqadYx74muv5/sse",
+            "url": zapier_url,
             "transport": "sse",
         }
     }
