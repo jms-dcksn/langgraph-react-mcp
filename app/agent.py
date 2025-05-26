@@ -4,38 +4,37 @@ from langchain_openai import ChatOpenAI
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
 
-from app.utils import parse_agent_response
-
 from dotenv import load_dotenv
 import os
 
 load_dotenv()  # take environment variables from .env.
 
 zapier_url = os.getenv("ZAPIER_URL")
+print(zapier_url)
 
 # Define your local LLM's API endpoint
 local_llm = ChatOpenAI(
-    model="mistral",  # Replace with your model's name if different
-    base_url="http://localhost:11434/v1"
+    model="gpt-4o-mini",  # Replace with your model's name if different
+    #base_url="http://localhost:11434/v1"
 )
 
 async def stream_agent(message: str):
-    async with MultiServerMCPClient(
-        {
-            "zapier": {
+
+    client = MultiServerMCPClient({
+            "jd-test": {
                 "url": zapier_url,
-                "transport": "sse",
+                "transport": "streamable_http",
             }
-        }
-    ) as client:
-        agent = create_react_agent(
+        })
+    tools = await client.get_tools()
+    agent = create_react_agent(
             #"anthropic:claude-3-7-sonnet-latest",
             local_llm,
-            client.get_tools()
+            tools
         )
-        full_message = ""
+    full_message = ""
         # This assumes your agent supports astream or similar
-        async for chunk in agent.astream_events({"messages": message}):
+    async for chunk in agent.astream_events({"messages": message}):
             print("DEBUG: chunk =", chunk)
             # Only process 'on_chat_model_stream' events
             if chunk.get("event") == "on_chat_model_stream":

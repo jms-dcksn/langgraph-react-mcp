@@ -1,6 +1,5 @@
 import gradio as gr
 import asyncio
-from app.utils import parse_agent_response
 from app.agent import stream_agent
 
 async def chat_stream_fn(message, history):
