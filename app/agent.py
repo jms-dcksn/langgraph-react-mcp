@@ -19,11 +19,15 @@ local_llm = ChatOpenAI(
 )
 
 async def stream_agent(message: str):
-
     client = MultiServerMCPClient({
             "jd-test": {
                 "url": zapier_url,
                 "transport": "streamable_http",
+            },
+            "math": {
+                "command": "python",
+                "args": ["/Users/jamesdickson/Projects/langchain-mcp/app/math_server.py"],
+                "transport": "stdio",
             }
         })
     tools = await client.get_tools()
@@ -41,13 +45,8 @@ async def stream_agent(message: str):
                 data = chunk.get("data", {})
                 ai_chunk = data.get("chunk")
                 if hasattr(ai_chunk, "content") and ai_chunk.content:
-                    # for part in ai_chunk.content:
-                    #     if isinstance(part, dict) and "text" in part:
-                    #         full_message += part["text"]
-                    #         yield full_message 
                     full_message += ai_chunk.content
                     yield full_message
-                    #yield ai_chunk.content
                 # Optionally, handle the final message for tool info
             elif chunk.get("event") == "on_chat_model_end":
                 data = chunk.get("data", {})
